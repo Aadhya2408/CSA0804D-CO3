@@ -1,0 +1,66 @@
+timetable = {
+    '12163': {'name': 'Chennai Express',
+              'stops': [('Chennai Central', '--', '21:10'), ('Tambaram', '21:35', '21:37'),
+                        ('Villupuram', '23:05', '23:10'), ('Trichy', '01:30', '01:35'),
+                        ('Madurai', '04:15', '--')],
+              'days': {'Mon', 'Wed', 'Fri'}},
+    '12631': {'name': 'Southern Mail',
+              'stops': [('Chennai Central', '--', '19:30'), ('Villupuram', '21:50', '21:55'),
+                        ('Trichy', '00:10', '00:15'), ('Tirunelveli', '05:40', '--')],
+              'days': {'Mon', 'Tue', 'Thu', 'Sat'}},
+    '12605': {'name': 'Pallavan Express',
+              'stops': [('Chennai Egmore', '--', '15:45'), ('Villupuram', '17:55', '18:00'),
+                        ('Trichy', '20:25', '--')],
+              'days': {'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'}},
+    '16101': {'name': 'Coastal Link',
+              'stops': [('Chennai Egmore', '--', '06:10'), ('Chengalpattu', '07:00', '07:02'),
+                        ('Villupuram', '08:30', '08:35'), ('Cuddalore', '09:30', '--')],
+              'days': {'Tue', 'Thu', 'Sun'}},
+    '22651': {'name': 'Temple Town Superfast',
+              'stops': [('Chennai Central', '--', '23:00'), ('Villupuram', '01:20', '01:25'),
+                        ('Madurai', '06:00', '--')],
+              'days': {'Mon', 'Fri', 'Sun'}},
+}                                                   # illustrative data, not the real railway
+timetable
+
+def sort_key(row):                                  # row = (train no, name, arrival, departure)
+    return row[3] if row[3] != '--' else row[2]
+
+def trains_at(station, day):
+    result = []
+    for number, info in timetable.items():
+        if day in info['days']:
+            for st, arr, dep in info['stops']:
+                if st == station:
+                    result.append((number, info['name'], arr, dep))
+    return sorted(result, key=sort_key)
+
+def show(rows, station, day):
+    print('Trains at', station, 'on', day)
+    print('%-8s %-24s %-8s %-8s' % ('Train', 'Name', 'Arrival', 'Departs'))
+    for number, name, arr, dep in rows:
+        print('%-8s %-24s %-8s %-8s' % (number, name, arr, dep))
+
+print('Third stop departure of 12163:', timetable['12163']['stops'][2][2])    # 23:10
+show(trains_at('Villupuram', 'Mon'), 'Villupuram', 'Mon')
+
+
+# ----------- Station index -----------
+station_index = {}
+for number, info in timetable.items():
+    for st, arr, dep in info['stops']:
+        station_index.setdefault(st, []).append(number)
+
+def trains_at_indexed(station, day):
+    result = []
+    for number in station_index.get(station, []):
+        info = timetable[number]
+        if day in info['days']:
+            for st, arr, dep in info['stops']:
+                if st == station:
+                    result.append((number, info['name'], arr, dep))
+    return sorted(result, key=sort_key)
+
+print('Index entry for Villupuram:', station_index['Villupuram'])
+print('Index gives same answer:', trains_at('Villupuram', 'Mon') ==
+      trains_at_indexed('Villupuram', 'Mon'))
