@@ -1,0 +1,39 @@
+def make_contacts(n):
+    pool = max(1, n // 2)    # about half are duplicates
+    numbers = random.sample(range(9_000_000_000, 9_999_999_999), pool)
+    formats = [lambda s: s,
+               lambda s: '+91 ' + s[:5] + ' ' + s[5:],
+               lambda s: '0' + s,
+               lambda s: s[:5] + '-' + s[5:]]
+    contacts = []
+    for _ in range(n):
+        num = str(random.choice(numbers))
+        contacts.append({'name': random.choice(['Dr. ', 'Mr. ', '']) + 'Person',
+                         'numbers': [random.choice(formats)(num)]})
+    return contacts
+
+def merge_pairwise(contacts):    # naive O(n^2) comparison
+    records = []
+    for c in contacts:
+        nums = {n for n in map(norm_number, c.get('numbers', [])) if n}
+        for rec in records:
+            if rec['numbers'] & nums:
+                rec['numbers'] |= nums
+                break
+        else:
+            records.append({'numbers': set(nums)})
+    return records
+
+for n in (1_000, 10_000, 100_000):
+    data = make_contacts(n)
+    t0 = time.perf_counter()
+    fast = merge_contacts(data)
+    t1 = time.perf_counter()
+    print(n, 'contacts | dictionary method:', round(t1 - t0, 4), 's | unique persons:', len(fast))
+    if n <= 10_000:    # 100,000 pairwise is about 5 billion comparisons
+        t2 = time.perf_counter()
+        slow = merge_pairwise(data)
+        t3 = time.perf_counter()
+        print('    pairwise method:', round(t3 - t2, 4), 's | same count:', len(slow) == len(fast))
+    else:
+        print('    pairwise method skipped (quadratic growth)')
