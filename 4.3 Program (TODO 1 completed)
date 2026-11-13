@@ -1,0 +1,36 @@
+data_science = {1001, 1002, 1003, 1004, 1005, 1003}    # duplicate 1003 removed
+cyber_security = {1004, 1005, 1006, 1007}
+all_students = set(range(1001, 1011))
+
+# TODO 1 (completed) - using set operators
+both = data_science & cyber_security
+either = data_science | cyber_security
+exactly_one = data_science ^ cyber_security
+only_ds = data_science - cyber_security
+only_cs = cyber_security - data_science
+neither = all_students - either
+
+print('Data Science size     :', len(data_science))                  # 5
+print('Clash (both)          :', sorted(both))                       # [1004, 1005]
+print('Either (union)        :', sorted(either))                     # [1001 ... 1007]
+print('Exactly one           :', sorted(exactly_one))                # [1001, 1002, 1003, 1006, 1007]
+print('Only Data Science     :', sorted(only_ds))                    # [1001, 1002, 1003]
+print('Only Cyber Security   :', sorted(only_cs))                    # [1006, 1007]
+print('Neither               :', sorted(neither))                    # [1008, 1009, 1010]
+
+# Same results rewritten with set METHODS
+both_m = data_science.intersection(cyber_security)
+either_m = data_science.union(cyber_security)
+exactly_one_m = data_science.symmetric_difference(cyber_security)
+only_ds_m = data_science.difference(cyber_security)
+neither_m = all_students.difference(either_m)
+print('Operators equal methods:',
+      both == both_m and either == either_m and exactly_one == exactly_one_m
+      and only_ds == only_ds_m and neither == neither_m)               # True
+
+# Membership and invalid element
+print(1004 in data_science)                                             # True
+try:
+    bad = {[1, 2], [3, 4]}
+except TypeError as err:
+    print('TypeError:', err)                                            # unhashable type: 'list'
