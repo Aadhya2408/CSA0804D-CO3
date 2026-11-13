@@ -1,0 +1,46 @@
+def frequencies(texts, stop):
+    # TODO 1 (completed): count words, ignoring stop words
+    counts = {}
+    for text in texts:
+        for word in text.lower().split():
+            word = word.strip('.,!?;:()')
+            if word and word not in stop:
+                counts[word] = counts.get(word, 0) + 1
+    return counts
+
+def top(counts, k):
+    # TODO 2 (completed): k most frequent words; ties broken alphabetically
+    return sorted(counts.items(), key=lambda pair: (-pair[1], pair[0]))[:k]
+
+complaints = [
+    ('Salem', 'paddy', 'Leaves of paddy are turning yellow'),
+    ('Madurai', 'cotton', 'Pest attack on cotton leaves'),
+    ('Salem', 'paddy', 'Need advice on pest control for paddy'),
+    ('Erode', 'turmeric', 'Rhizome rot in turmeric field'),
+    ('Madurai', 'cotton', 'Cotton leaves are curling'),
+    ('Salem', 'banana', 'Banana leaves are turning brown'),
+]
+stop = {'of', 'are', 'on', 'for', 'in', 'the', 'is', 'a', 'need'}
+
+texts = [c[2] for c in complaints]
+counts = frequencies(texts, stop)
+print('Top 5 words:', top(counts, 5))
+# Expected: [('leaves', 4), ('cotton', 2), ('paddy', 2), ('pest', 2), ('turning', 2)]
+
+# Complaints per district (get)
+per_district = {}
+for district, crop, text in complaints:
+    per_district[district] = per_district.get(district, 0) + 1
+print('Per district:', per_district)
+# Expected: {'Salem': 3, 'Madurai': 2, 'Erode': 1}
+
+# Complaint list per crop (setdefault)
+per_crop = {}
+for district, crop, text in complaints:
+    per_crop.setdefault(crop, []).append(text)
+for crop, items in per_crop.items():
+    print(crop, '->', items)
+
+print(list(per_district.keys()))
+print(list(per_district.values()))
+print(list(per_district.items()))
