@@ -1,0 +1,22 @@
+import random
+import time
+
+for n in (10_000, 100_000, 1_000_000):
+    a = random.sample(range(2 * n), n)
+    b = random.sample(range(2 * n), n)
+    t0 = time.perf_counter(); sa, sb = set(a), set(b)
+    t1 = time.perf_counter(); common = sa & sb
+    t2 = time.perf_counter(); union = sa | sb
+    t3 = time.perf_counter()
+    probe = a[-1]
+    s0 = time.perf_counter(); _ = probe in sa
+    s1 = time.perf_counter(); _ = probe in a             # list membership scan
+    s2 = time.perf_counter()
+    print(n, '| build:', round(t1 - t0, 4), '| &:', round(t2 - t1, 4), '| |:', round(t3 - t2, 4),
+          '| in set:', s1 - s0, '| in list:', s2 - s1)
+    if n <= 10_000:                                     # list-based intersection is O(n*m)
+        t4 = time.perf_counter()
+        slow = [x for x in a if x in b]
+        t5 = time.perf_counter()
+        print('     list-based intersection:', round(t5 - t4, 4), 's | same:',
+              set(slow) == common)
