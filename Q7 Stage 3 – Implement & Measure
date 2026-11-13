@@ -1,0 +1,85 @@
+import random
+import time
+
+TITLES = {'dr', 'mr', 'mrs', 'ms', 'prof', 'shri', 'smt'}
+
+def norm_number(raw):
+    digits = ''.join(ch for ch in (raw or '') if ch.isdigit())
+    if len(digits) < 10:
+        return None
+    return digits[-10:]
+
+def norm_name(raw):
+    cleaned = ''.join(ch if ch.isalpha() else ' ' for ch in (raw or '').lower())
+    return ' '.join(w for w in cleaned.split() if w not in TITLES)
+
+def norm_email(raw):
+    raw = (raw or '').strip().lower()
+    return raw if '@' in raw else None
+
+def merge_contacts(*sources):
+    records = {}    # id -> {'names': set, 'numbers': set, 'emails': set}
+    index = {}      # normalised number or e-mail -> record id
+    next_id = 0
+    for source in sources:
+        for c in source:
+            numbers = {n for n in map(norm_number, c.get('numbers', [])) if n}
+            emails = {e for e in map(norm_email, c.get('emails', [])) if e}
+            name = norm_name(c.get('name', ''))
+            keys = numbers | emails
+            ids = {index[k] for k in keys if k in index}
+            if not ids:
+                rid = next_id
+                next_id += 1
+                records[rid] = {'names': set(), 'numbers': set(), 'emails': set()}
+            else:
+                rid = min(ids)
+                for other in ids - {rid}:
+                    old = records.pop(other)
+                    for field in old:
+                        records[rid][field] |= old[field]
+                    for k in old['numbers'] | old['emails']:
+                        index[k] = rid
+            rec = records[rid]
+            if name:
+                rec['names'].add(name)
+            rec['numbers'] |= numbers
+            rec['emails'] |= emails
+            for k in keys:
+                index[k] = rid
+    return list(records.values())
+
+def display(rec):
+    best = max(rec['names'], key=len).title() if rec['names'] else '(no name)'
+    return best, sorted(rec['numbers']), sorted(rec['emails'])
+
+# ---------- Test data with duplicates and missing fields ----------
+phone1 = [{'name': 'Dr. Ravi', 'numbers': ['+91 98400 12345']},
+          {'name': 'Suresh', 'numbers': ['91234 56789']}]
+phone2 = [{'name': 'ravi kumar', 'numbers': ['9840012345'], 'emails': ['Ravi@Example.com']},
+          {'name': 'Meena S', 'numbers': ['98765-43210']}]
+sim = [{'name': 'Ravi K', 'numbers': ['098400 12345']},
+       {'name': 'Meena', 'numbers': ['+91 98765 43210', '90000 11111']},
+       {'name': 'Karthik', 'numbers': []}]    # no number, no e-mail
+
+merged = merge_contacts(phone1, phone2, sim)
+print('Input contacts:', len(phone1) + len(phone2) + len(sim), '| merged persons:', len(merged))
+for rec in merged:
+    print(display(rec))
+
+# Expected: 7 input contacts -> 4 persons
+# ('Ravi Kumar', ['9840012345'], ['ravi@example.com'])
+# ('Suresh', ['9123456789'], [])
+# ('Meena S', ['9000011111', '9876543210'], [])
+# ('Karthik', [], [])
+
+# ---------- More edge cases ----------
+bridge = [{'name': 'A', 'numbers': ['9111111111']},
+          {'name': 'B', 'numbers': ['9222222222']},
+          {'name': 'C', 'numbers': ['9111111111', '9222222222']}]    # C links A and B
+print('Bridging test (expect 1):', len(merge_contacts(bridge)))
+print('Empty input (expect 0):', len(merge_contacts([])))
+print('Invalid number kept separate (expect 2):',
+      len(merge_contacts([{'name': 'X', 'numbers': ['12345']}, {'name': 'X', 'numbers': ['12345']}])))
+print('Missing fields (expect 1):', len(merge_contacts([{'numbers': ['9333333333']},
+                                                       {'name': 'Q', 'numbers': ['9333333333']}])))
