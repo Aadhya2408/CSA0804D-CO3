@@ -1,0 +1,48 @@
+import copy
+import sys
+import time
+
+# ---------- 1. Stops as tuples used as dictionary keys ----------
+bus_stops = {                                     # approximate coordinates
+    (13.0827, 80.2707): 'Chennai Central',
+    (13.0732, 80.2609): 'Egmore',
+    (13.0569, 80.2425): 'Nungambakkam',
+    (13.0108, 80.2354): 'Guindy',
+}
+print(bus_stops[(13.0827, 80.2707)])             # lookup by coordinates
+
+print((13.0000, 80.0000) in bus_stops)            # False -> not a stop
+try:
+    wrong = {[13.0827, 80.2707]: 'Chennai Central'}
+except TypeError as err:
+    print('TypeError:', err)
+
+# ---------- 2. Zone grid: bug and fix ----------
+rows, cols = 3, 4
+# TODO 1 (completed): correct grid creation with list comprehension
+good = [[0 for _ in range(cols)] for _ in range(rows)]
+bad = [[0] * cols] * rows
+
+bad[0][1] = 9
+good[0][1] = 9
+print('bad :', bad)        # [[0, 9, 0, 0], [0, 9, 0, 0], [0, 9, 0, 0]]
+print('good:', good)       # [[0, 9, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+print('bad[0] is bad[1]', '->', bad[0] is bad[1])    # True
+print('good[0] is good[1]', '->', good[0] is good[1])  # False
+print('ids bad :', [id(r) for r in bad])
+print('ids good:', [id(r) for r in good])
+
+# ---------- 3. Aliasing, shallow copy, deep copy ----------
+original = [[1, 2], [3, 4]]
+alias = original
+shallow1 = copy.copy(original)
+shallow2 = original[:]
+deep = copy.deepcopy(original)
+
+original[0][0] = 99         # change an INNER list
+original.append([5, 6])     # change the OUTER list
+print('original:', original)    # [[99, 2], [3, 4], [5, 6]]
+print('alias    :', alias)        # same as original
+print('shallow1:', shallow1)    # [[99, 2], [3, 4]] (inner shared, outer separate)
+print('shallow2:', shallow2)    # [[99, 2], [3, 4]]
+print('deep    :', deep)        # [[1, 2], [3, 4]] (fully independent)
