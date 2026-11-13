@@ -1,0 +1,26 @@
+import random
+import time
+from collections import Counter
+
+vocab = ['word' + str(i) for i in range(50)]
+
+def make_texts(n):
+    return [' '.join(random.choices(vocab, k=5)) for _ in range(n)]
+
+def count_with_dict(words):
+    d = {}
+    for w in words:
+        d[w] = d.get(w, 0) + 1
+    return d
+
+def count_with_list_count(words):
+    return {w: words.count(w) for w in set(words)}
+
+for n in (1000, 10000, 100000):
+    words = ' '.join(make_texts(n)).split()
+    t0 = time.perf_counter(); r1 = count_with_dict(words)
+    t1 = time.perf_counter(); r2 = count_with_list_count(words)
+    t2 = time.perf_counter(); r3 = Counter(words)
+    t3 = time.perf_counter()
+    print(n, 'complaints | dict:', round(t1 - t0, 4), '| list.count:', round(t2 - t1, 4),
+        '| Counter:', round(t3 - t2, 4), '| agree:', r1 == r2 == dict(r3))
