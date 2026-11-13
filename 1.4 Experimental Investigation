@@ -1,0 +1,21 @@
+# --------- Edge cases ---------
+tests = {
+    'empty list': [],
+    'fewer than 7 values': [1, 2, 3],
+    'exactly 7 values': [7] * 7,
+    'all zeros': [0] * 10,
+    'one extra day': list(range(8)),
+}
+for name, data in tests.items():
+    print(name, '->', moving_avg_naive(data), moving_avg_running(data))
+
+# --------- Timing on large random data ---------
+big = [random.uniform(0, 50) for _ in range(100_000)]
+for k in (7, 30, 100):
+    t0 = time.perf_counter()
+    a = moving_avg_naive(big, k)
+    t1 = time.perf_counter()
+    b = moving_avg_running(big, k)
+    t2 = time.perf_counter()
+    same = all(abs(x - y) < 1e-6 for x, y in zip(a, b))
+    print('k =', k, '| naive:', round(t1 - t0, 4), 's | running:', round(t2 - t1, 4), 's | same result:', same)
