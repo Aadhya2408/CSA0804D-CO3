@@ -1,0 +1,46 @@
+import random
+import time
+
+# --------- Generate 365 test readings (about 65% dry days) ---------
+random.seed(1)
+readings = [round(random.uniform(1, 40), 1) if random.random() < 0.35 else 0.0
+            for _ in range(365)]
+
+# --------- Weekly totals using slicing ---------
+weekly_totals = []
+for start in range(0, len(readings) - 6, 7):      # 52 full weeks
+    weekly_totals.append(round(sum(readings[start:start + 7]), 1))
+leftover = readings[52 * 7:]                    # day 365 (partial week)
+print('Weekly totals (52 full weeks):', weekly_totals)
+print('Leftover day(s):', leftover)
+
+# --------- Wettest / driest week with positions ---------
+wettest = max(weekly_totals)
+driest = min(weekly_totals)
+print('Wettest week: week', weekly_totals.index(wettest) + 1, 'with', wettest, 'mm')
+print('Driest week : week', weekly_totals.index(driest) + 1, 'with', driest, 'mm')
+
+# --------- 7-day moving average ---------
+def moving_avg_naive(data, k=7):
+    if k <= 0 or k > len(data):
+        return []
+    return [sum(data[i:i + k]) / k for i in range(len(data) - k + 1)]
+
+def moving_avg_running(data, k=7):
+    if k <= 0 or k > len(data):
+        return []
+    window = sum(data[:k])
+    result = [window / k]
+    for i in range(k, len(data)):
+        window += data[i] - data[i - k]
+        result.append(window / k)
+    return result
+
+ma = moving_avg_running(readings)
+print('Moving averages computed:', len(ma))
+print('First 5:', [round(x, 2) for x in ma[:5]])
+
+# --------- Dry days (0 mm) ---------
+dry_days = [day for day, mm in enumerate(readings, start=1) if mm == 0]
+print('Number of dry days:', len(dry_days))
+print('First 10 dry days:', dry_days[:10])
