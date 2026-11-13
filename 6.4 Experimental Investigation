@@ -1,0 +1,31 @@
+import random
+import time
+
+stations = ['Station' + str(i) for i in range(200)]
+
+def build(n_trains):
+    data = {}
+    for i in range(n_trains):
+        route = random.sample(stations, 10)
+        stops = [(s, '08:00', '08:05') for s in route]
+        data[str(10000 + i)] = {'name': 'Train' + str(i), 'stops': stops,
+                                'days': {'Mon', 'Wed'}}
+    return data
+
+for n in (100, 1000, 10000):
+    timetable = build(n)
+    station_index = {}
+    for number, info in timetable.items():
+        for st, arr, dep in info['stops']:
+            station_index.setdefault(st, []).append(number)
+    t0 = time.perf_counter()
+    for _ in range(20):
+        trains_at('Station7', 'Mon')
+    t1 = time.perf_counter()
+    for _ in range(20):
+        trains_at_indexed('Station7', 'Mon')
+    t2 = time.perf_counter()
+    print(n, 'trains | without index:', round((t1 - t0) / 20, 6), 's | with index:',
+          round((t2 - t1) / 20, 6), 's')
+
+#This should be run inside "6.3 Program"
