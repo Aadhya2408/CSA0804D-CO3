@@ -1,0 +1,11 @@
+t = (13.0827, 80.2707)
+l = [13.0827, 80.2707]
+print('Size of tuple:', sys.getsizeof(t), 'bytes')
+print('Size of list :', sys.getsizeof(l), 'bytes')
+
+setup = 'a = 13.0827; b = 80.2707; t = (a, b); l = [a, b]'
+n = 1_000_000
+print('Create tuple :', timeit.timeit('(a, b)', setup, number=n))
+print('Create list  :', timeit.timeit('[a, b]', setup, number=n))
+print('Index tuple  :', timeit.timeit('t[1]', setup, number=n))
+print('Index list   :', timeit.timeit('l[1]', setup, number=n))
