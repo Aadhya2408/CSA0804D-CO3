@@ -1,0 +1,37 @@
+raw = [4.5, 5.2, 999, 7.8, 9.1, -80, 2.0, 1.5, 8.0, 6.3, 55, 3.3]   # one reading per minute
+
+def is_valid(t):
+    return -50 <= t <= 50
+
+# --- Method 1: for loop with append ---
+valid_c1 = []
+for t in raw:
+    if is_valid(t):
+        valid_c1.append(t)
+valid_f1 = []
+for t in valid_c1:
+    valid_f1.append(round(t * 9 / 5 + 32, 2))
+
+# --- Method 2: list comprehensions with conditions ---
+valid_c2 = [t for t in raw if -50 <= t <= 50]
+valid_f2 = [round(t * 9 / 5 + 32, 2) for t in valid_c2]
+
+# --- Method 3: map() and filter() with lambda ---
+valid_c3 = list(filter(lambda t: -50 <= t <= 50, raw))
+
+valid_f3 = list(map(lambda t: round(t * 9 / 5 + 32, 2), valid_c3))
+
+print('Valid Celsius   :', valid_c2)
+print('Valid Fahrenheit:', valid_f2)
+print('All three methods agree:', valid_c1 == valid_c2 == valid_c3 and valid_f1 == valid_f2 == valid_f3)
+
+# --- Alarm minutes (valid readings outside 2-8 C) using enumerate ---
+alarms = [(minute, t) for minute, t in enumerate(raw)
+          if -50 <= t <= 50 and not (2 <= t <= 8)]
+print('Alarm (minute, temperature):', alarms)     # [(4, 9.1), (7, 1.5)]
+
+# --- Dictionary and set comprehensions ---
+minute_to_temp = {m: t for m, t in enumerate(raw) if is_valid(t)}
+rounded_set = {round(t) for t in valid_c2}
+print('Minute -> temp dictionary:', minute_to_temp)
+print('Distinct rounded temperatures:', sorted(rounded_set))
